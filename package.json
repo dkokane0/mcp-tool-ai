@@ -1,0 +1,23 @@
+{
+  "name": "mcp-gateway-tutorial",
+  "version": "1.0.0",
+  "description": "A small MCP gateway tutorial that proxies tools from two Streamable HTTP MCP servers.",
+  "type": "module",
+  "scripts": {
+    "server1": "tsx mcp1.ts",
+    "server2": "tsx mcp2.ts",
+    "gateway": "tsx mcp-gateway.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "express": "^4.19.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.9",
+    "tsx": "^4.20.0",
+    "typescript": "^5.5.2"
+  }
+}
