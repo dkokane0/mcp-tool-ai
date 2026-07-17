@@ -2,6 +2,7 @@ import express from "express";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { z } from "zod";
+import { mcpConfig } from "./config.js";
 
 const app = express();
 app.use(express.json());
@@ -48,7 +49,7 @@ function createServer() {
   return server;
 }
 
-app.all("/mcp", async (req, res) => {
+app.all(mcpConfig.path, async (req, res) => {
   const server = createServer();
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: undefined
@@ -72,6 +73,8 @@ app.all("/mcp", async (req, res) => {
   }
 });
 
-app.listen(3001, () => {
-  console.log("MCP Server 2 is running on http://localhost:3001/mcp");
+app.listen(mcpConfig.server2Port, mcpConfig.listenHost, () => {
+  console.log(
+    `MCP Server 2 is running on http://${mcpConfig.publicHost}:${mcpConfig.server2Port}${mcpConfig.path}`
+  );
 });

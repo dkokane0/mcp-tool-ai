@@ -8,20 +8,13 @@ import {
   ListToolsRequestSchema
 } from "@modelcontextprotocol/sdk/types.js";
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
-
-interface RegistryEntry {
-  id: string;
-  url: string;
-  headers: Record<string, string>;
-}
+import { gatewayRegistry, mcpConfig } from "./config.js";
+import type { RegistryEntry } from "./config.js";
 
 const app = express();
 app.use(express.json());
 
-const registry: RegistryEntry[] = [
-  { id: "1", url: "http://localhost:3000/mcp", headers: {} },
-  { id: "2", url: "http://localhost:3001/mcp", headers: {} }
-];
+const registry = gatewayRegistry();
 
 async function withClient<T>(
   registryEntry: RegistryEntry,
@@ -117,7 +110,7 @@ function createGatewayServer() {
   return gatewayServer;
 }
 
-app.all("/mcp", async (req, res) => {
+app.all(mcpConfig.path, async (req, res) => {
   const gatewayServer = createGatewayServer();
   const transport = new StreamableHTTPServerTransport({
     sessionIdGenerator: undefined
@@ -141,6 +134,9 @@ app.all("/mcp", async (req, res) => {
   }
 });
 
-app.listen(8000, () => {
-  console.log("Gateway is running on http://localhost:8000/mcp");
+app.listen(mcpConfig.gatewayPort, mcpConfig.listenHost, () => {
+  console.log(
+    `Gateway is running on http://${mcpConfig.publicHost}:${mcpConfig.gatewayPort}${mcpConfig.path}`
+  );
+  console.log(`Gateway registry: ${registry.map((entry) => `${entry.id}=${entry.url}`).join(", ")}`);
 });
