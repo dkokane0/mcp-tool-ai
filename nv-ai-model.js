@@ -18,6 +18,7 @@ const model =
   'z-ai/glm-5.2';
 
 const prompt = process.argv.slice(2).join(' ') || 'Say hello in one short sentence. and give me short programming example how i can implemnt the opensourse model switch and chat without interupt any response';
+const maxTokens = Number.parseInt(process.env.AI_MAX_TOKENS || '2048', 10);
 
 if (!apiKey) {
   throw new Error(
@@ -36,7 +37,7 @@ async function main() {
     messages: [{"role":"user","content": prompt}],
     temperature: 1,
     top_p: 1,
-    max_tokens: 16384,
+    max_tokens: maxTokens,
     seed: 42,
     stream: true
   });
