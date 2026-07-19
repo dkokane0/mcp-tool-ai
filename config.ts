@@ -63,13 +63,13 @@ function toEnvKey(id: string) {
 }
 
 export const mcpConfig = {
-  listenHost: env("MCP_LISTEN_HOST", "127.0.0.1")!,
+  listenHost: env("MCP_LISTEN_HOST", env("RENDER") ? "0.0.0.0" : "127.0.0.1")!,
   publicHost: env("MCP_PUBLIC_HOST", "localhost")!,
   path: normalizePath(env("MCP_PATH", "/mcp")!),
   server1Port: envInt("MCP1_PORT", 3000),
   server2Port: envInt("MCP2_PORT", 3001),
   aiPort: envInt("MCP_AI_PORT", 3002),
-  gatewayPort: envInt("MCP_GATEWAY_PORT", 8000)
+  gatewayPort: envInt("MCP_GATEWAY_PORT", envInt("PORT", 8000))
 };
 
 export function serverUrl(port: number) {

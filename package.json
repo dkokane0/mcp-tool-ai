@@ -10,7 +10,8 @@
     "gateway": "tsx mcp-gateway.ts",
     "all": "concurrently \"npm:server1\" \"npm:server2\" \"npm:ai\" \"npm:gateway\"",
     "build": "tsc",
-    "start": "concurrently \"node mcp1.js\" \"node mcp2.js\" \"node mcp-ai.js\" \"node mcp-gateway.js\"",
+    "dev": "concurrently \"node mcp1.js\" \"node mcp2.js\" \"node mcp-ai.js\" \"node mcp-gateway.js\"",
+    "start": "node start-render.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
