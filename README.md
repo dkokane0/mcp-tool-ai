@@ -1,30 +1,27 @@
 # MCP Tool AI
 
-This repository contains a configurable Model Context Protocol (MCP) gateway.
-It runs multiple Streamable HTTP MCP servers and exposes all of their tools
-through one gateway endpoint that can be used from Cursor, Antigravity, or any
-other MCP client that supports Streamable HTTP.
+Deployable Express app for MCP tools and an OpenAI-compatible AI provider.
+
+The app exposes one public MCP gateway endpoint and mounts the backend MCP
+servers inside the same Express process, which makes it simple to deploy on
+Render, Railway, Fly, Docker, or any host that gives the app a single `PORT`.
 
 ## Project Structure
 
-- `mcp1.ts` - MCP Server 1 on port `3000`
-  - `add_number`
-  - `subtract_number`
-- `mcp2.ts` - MCP Server 2 on port `3001`
-  - `multiply_number`
-  - `divide_number`
-- `mcp-ai.ts` - AI API MCP server on port `3002`
-  - `list_ai_providers`
-  - `list_ai_models`
-  - `chat_with_model`
-  - `openai_compatible_request`
-- `mcp-gateway.ts` - Gateway server on port `8000`
-  - Lists tools from both backend servers.
-  - Prefixes tool names with the backend id, such as `1/add_number` or
-    `ai/chat_with_model`.
-  - Routes tool calls back to the correct MCP server.
-- `config.ts` - Shared environment configuration.
-- `.env.example` - Example environment configuration.
+```text
+src/
+  app.ts                         Express app factory
+  server.ts                      Production entrypoint
+  cli/                           Standalone development launchers
+  config/                        Environment parsing and service URLs
+  gateway/                       MCP gateway/proxy server
+  http/                          Shared Express MCP endpoint mounting
+  servers/                       MCP server definitions
+  services/                      AI provider request helpers
+```
+
+Root files such as `mcp1.ts`, `mcp2.ts`, `mcp-ai.ts`, and `mcp-gateway.ts`
+are compatibility launchers that point to the new `src/cli` entrypoints.
 
 ## Requirements
 
@@ -37,7 +34,11 @@ other MCP client that supports Streamable HTTP.
 npm install
 ```
 
-Create a `.env` file from `.env.example` and add your provider keys:
+Create a `.env` file from `.env.example` and add provider keys:
+
+```bash
+cp .env.example .env
+```
 
 PowerShell:
 
@@ -45,13 +46,7 @@ PowerShell:
 Copy-Item .env.example .env
 ```
 
-Bash:
-
-```bash
-cp .env.example .env
-```
-
-For NVIDIA hosted NIM, set:
+For NVIDIA hosted NIM:
 
 ```env
 AI_PROVIDERS=nvidia
@@ -61,49 +56,21 @@ AI_NVIDIA_MODEL=openai/gpt-oss-120b
 AI_NVIDIA_API_KEY=your-key-here
 ```
 
-NVIDIA NIM exposes OpenAI-compatible endpoints such as
-`POST /v1/chat/completions` and `GET /v1/models`.
+## Run Locally
 
-## Run
-
-Run everything in one terminal:
+Run the deployable Express app:
 
 ```bash
-npm run all
+npm run dev
 ```
 
-Or open four terminals from the project folder.
+Default endpoints:
 
-Terminal 1:
-
-```bash
-npm run server1
-```
-
-Terminal 2:
-
-```bash
-npm run server2
-```
-
-Terminal 3:
-
-```bash
-npm run ai
-```
-
-Terminal 4:
-
-```bash
-npm run gateway
-```
-
-Endpoints:
-
-- Server 1: `http://localhost:3000/mcp`
-- Server 2: `http://localhost:3001/mcp`
-- AI Server: `http://localhost:3002/mcp`
-- Gateway: `http://localhost:8000/mcp`
+- Health: `http://localhost:8000/health`
+- Gateway MCP endpoint: `http://localhost:8000/mcp`
+- Server 1 MCP endpoint: `http://localhost:8000/servers/1/mcp`
+- Server 2 MCP endpoint: `http://localhost:8000/servers/2/mcp`
+- AI MCP endpoint: `http://localhost:8000/servers/ai/mcp`
 
 Use the gateway URL in MCP clients:
 
@@ -111,23 +78,62 @@ Use the gateway URL in MCP clients:
 http://localhost:8000/mcp
 ```
 
-## Type Check
+## Build And Start
 
 ```bash
-npm run typecheck
+npm run build
+npm start
 ```
 
-## Notes
+`npm start` runs:
 
-The gateway uses Streamable HTTP clients to connect to the backend MCP servers.
-When a client lists tools from the gateway, the gateway fetches tools from each
-registered backend and returns unique names in the format:
+```bash
+node --max-old-space-size=384 dist/src/server.js
+```
+
+For deployment, set at least:
+
+```env
+PORT=8000
+MCP_LISTEN_HOST=0.0.0.0
+APP_BASE_URL=https://your-public-host
+```
+
+If the hosting platform sets `PORT`, the app uses it automatically.
+
+## Standalone Development
+
+You can still run each MCP service on its own port:
+
+```bash
+npm run all
+```
+
+Or run individual services:
+
+```bash
+npm run server1
+npm run server2
+npm run ai
+npm run gateway
+```
+
+Standalone defaults:
+
+- Server 1: `http://localhost:3000/mcp`
+- Server 2: `http://localhost:3001/mcp`
+- AI Server: `http://localhost:3002/mcp`
+- Gateway: `http://localhost:8000/mcp`
+
+## Gateway Tool Names
+
+The gateway prefixes tool names with the backend id:
 
 ```text
 <server-id>/<tool-name>
 ```
 
-For example:
+Examples:
 
 - `1/add_number`
 - `1/subtract_number`
@@ -140,20 +146,25 @@ For example:
 
 ## Environment Configuration
 
-All ports, paths, gateway entries, and AI providers are controlled by env vars.
-
 Core MCP settings:
 
 ```env
 MCP_LISTEN_HOST=127.0.0.1
 MCP_PUBLIC_HOST=localhost
 MCP_PATH=/mcp
+PORT=8000
+APP_BASE_URL=http://localhost:8000
 MCP1_PORT=3000
 MCP2_PORT=3001
 MCP_AI_PORT=3002
 MCP_GATEWAY_PORT=8000
 MCP_GATEWAY_SERVERS=1,2,ai
 ```
+
+In the default one-port Express app, gateway registry URLs for `1`, `2`, and
+`ai` point at the mounted routes under `/servers/*`. Set
+`MCP_GATEWAY_USE_EXTERNAL_URLS=true` only when the gateway should call separate
+service URLs from `MCP1_URL`, `MCP2_URL`, and `MCP_AI_URL`.
 
 AI provider settings:
 

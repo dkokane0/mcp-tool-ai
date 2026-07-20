@@ -1,17 +1,18 @@
 {
-  "name": "mcp-gateway-tutorial",
+  "name": "mcp-tool-ai",
   "version": "1.0.0",
-  "description": "A small MCP gateway tutorial that proxies tools from two Streamable HTTP MCP servers.",
+  "description": "Deployable Express app that exposes MCP tool servers through one gateway.",
   "type": "module",
   "scripts": {
-    "server1": "tsx mcp1.ts",
-    "server2": "tsx mcp2.ts",
-    "ai": "tsx mcp-ai.ts",
-    "gateway": "tsx mcp-gateway.ts",
+    "dev": "tsx src/server.ts",
+    "server1": "tsx src/cli/server1.ts",
+    "server2": "tsx src/cli/server2.ts",
+    "ai": "tsx src/cli/ai.ts",
+    "gateway": "tsx src/cli/gateway.ts",
     "all": "concurrently \"npm:server1\" \"npm:server2\" \"npm:ai\" \"npm:gateway\"",
-    "build": "node --max-old-space-size=512 ./node_modules/typescript/bin/tsc",
-    "dev": "concurrently \"node mcp1.js\" \"node mcp2.js\" \"node mcp-ai.js\" \"node mcp-gateway.js\"",
-    "start": "node --max-old-space-size=384 start-render.js",
+    "ai:chat": "tsx src/cli/nvAiModel.ts",
+    "build": "tsc",
+    "start": "node --max-old-space-size=384 dist/src/server.js",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
