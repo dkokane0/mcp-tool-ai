@@ -8,8 +8,8 @@ const skipDirs = new Set([".git", ".agents", ".codex", "dist", "node_modules", "
 
 const compilerOptions = {
   target: ts.ScriptTarget.ES2022,
-  module: ts.ModuleKind.NodeNext,
-  moduleResolution: ts.ModuleResolutionKind.NodeNext,
+  module: ts.ModuleKind.ES2022,
+  moduleResolution: ts.ModuleResolutionKind.Bundler,
   esModuleInterop: true,
   sourceMap: false
 };
