@@ -91,6 +91,10 @@ npm start
 node --max-old-space-size=384 dist/src/server.js
 ```
 
+The deploy build uses a lightweight transpile step to avoid TypeScript heap
+spikes on small hosts. Run `npm run typecheck` separately when you want full
+TypeScript validation.
+
 For deployment, set at least:
 
 ```env
